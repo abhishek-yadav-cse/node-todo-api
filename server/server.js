@@ -1,3 +1,6 @@
+//using lodash to create update route
+const _ = require('lodash');
+
 //pulling off mongoose property through es6 destructuring
 var {mongoose} = require('./db/mongoose');
 
@@ -89,9 +92,10 @@ var {mongoose} = require('./db/mongoose');
 // });
 
 
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require('mongodb');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
+
 
 
 var {Todo} = require('./models/todo');
@@ -190,6 +194,45 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 
+
+
+//creating the UPDATE route
+app.patch('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  //creating a body variable having subset of things user pass to us
+  //we dont user to update everything, in our case we only want user to update text and completed field
+  var body = _.pick(req.body, ['text', 'completed']);
+
+
+  if (!ObjectID.isValid(id)) {
+       // 404 -  send back empty body
+    return res.status(404).send();
+  }
+
+  //updating the completedAt property
+  //check the user changing the completed todo and adding a timestamp
+  if (_.isBoolean(body.completed) && body.completed) {
+    //
+    body.completedAt = new Date().getTime();
+  } else {
+    //
+    body.completed = false;
+    body.completedAt = null;
+  }
+
+  //querry to actually update the database
+  //we will use a similar method like findOneAndUpdate
+
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    if(!todo) {
+      return res.status(404).send();
+    }
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  })
+
+});
 
 
 
