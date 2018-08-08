@@ -102,6 +102,7 @@ const {ObjectID} = require('mongodb');
 
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
 
 var app = express();
 //const port = process.env.PORT || 3000;
@@ -264,6 +265,52 @@ app.post('/users', (req, res) => {
     res.status(400).send(e);
   })
 });
+
+
+// //defining a middleware which can use /users/me route in all other routes
+// var authenticate = (req, res, next) => {
+//   var token = req.header('x-auth');
+//
+//   User.findByToken(token).then((user) => {
+//     if (!user) {
+//       //res.status(401).send();
+//       return Promise.reject();
+//     }
+//
+//     res.user = user;
+//     req.token = token;
+//     next();
+//   }).catch((e) => {
+//     //authentication error
+//     res.status(401).send();
+//   });
+// };
+
+//it can be placed inside its own file
+
+
+//route associate to particular user - private route
+//first we will use normal methods then we will use express middleware for that
+// app.get('/users/me', (req, res) => {
+//   var token = req.header('x-auth');
+//
+//   User.findByToken(token).then((user) => {
+//     if (!user) {
+//       //res.status(401).send();
+//       return Promise.reject();
+//     }
+//
+//     res.send(user);
+//   }).catch((e) => {
+//     //authentication error
+//     res.status(401).send();
+//   });
+// });
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});
+
 
 
 app.listen(port, () => {
