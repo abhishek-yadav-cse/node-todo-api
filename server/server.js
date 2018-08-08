@@ -250,8 +250,16 @@ app.post('/users', (req, res) => {
   var user = new User(body);
 
 
-  user.save().then((user) => {
-    res.send(user);
+  user.save().then(() => {
+    //res.send(user);
+    return user.generateAuthToken();
+  }).then((token) => {
+    //res.send(user);
+
+    //sending the token back as http response header
+    res.header('x-auth', token).send(user);
+
+    //header with x means custom header
   }).catch((e) => {
     res.status(400).send(e);
   })
