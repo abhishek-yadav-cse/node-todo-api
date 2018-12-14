@@ -197,6 +197,7 @@ describe('PATCH /todos/:id', () => {
     //update text, set completed to false
     //200
     //text is changed, completed false, completedAt is null .toNotExist
+    //
 
     var hexID = todos[1]._id.toHexString();
     var text = 'This should be the new text!!';
